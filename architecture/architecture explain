@@ -1,0 +1,40 @@
+# DevOps Final Project: Smart Note API
+
+**Môn học:** DevOps - Học kỳ 2026  
+**Nhóm:** Làng Xì Mi  
+
+---
+
+## 👥 Thành viên nhóm & Phân công nhiệm vụ
+1. **Nguyễn Bá Toàn:** Thiết kế kiến trúc hạ tầng, thiết lập Server Ubuntu, cấu hình UFW Firewall và Nginx.
+2. **Trần Tiến Minh:** Xây dựng backend Node.js (Express), kết nối và cấu hình mô hình dữ liệu.
+3. **Hồ Thăng Bảo Huy:** Cài đặt MongoDB, thiết lập PM2, cấu hình Git repo và kiểm thử ứng dụng.
+
+---
+
+## 🏛️ Sơ đồ kiến trúc hệ thống (Architecture)
+*(Hình ảnh sơ đồ kiến trúc lưu tại thư mục `docs/architecture.png`)*
+
+```mermaid
+graph TD
+    Client["Client (Web Browser)"]
+    
+    subgraph AWS_Cloud ["AWS Cloud (EC2 Instance)"]
+        Firewall["Firewall / Security Group (UFW)<br>Ports: 22, 80, 443"]
+        Proxy["Reverse Proxy / Web Server<br>(Nginx)"]
+        
+        subgraph App_Server ["Application Runtime"]
+            PM2["Process Manager (PM2)"]
+            NodeApp["Web/API Application<br>(Node.js / Express - Port 3000)"]
+        end
+        
+        subgraph Storage ["Database & Storage"]
+            MongoDB[("Database (MongoDB Local)<br>notedb")]
+        end
+    end
+
+    Client -->|HTTP / HTTPS (Port 80/443)| Firewall
+    Firewall --> Proxy
+    Proxy -->|Forward Request| NodeApp
+    PM2 -.->|Manages| NodeApp
+    NodeApp -->|Read / Write Notes| MongoDB
