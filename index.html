@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>DevOps Smart Note App</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        input, textarea { width: 100%; margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #218838; }
+        .note { background: #e9ecef; padding: 15px; margin-top: 15px; border-radius: 4px; border-left: 5px solid #007bff; }
+        .note h4 { margin: 0 0 5px 0; color: #007bff; }
+        .note p { margin: 0; color: #555; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📝 Smart Note - DevOps Week 1</h2>
+        <input type="text" id="title" placeholder="Nhập tiêu đề ghi chú..." required>
+        <textarea id="content" rows="4" placeholder="Nhập nội dung..." required></textarea>
+        <button onclick="saveNote()">Lưu Ghi Chú</button>
+
+        <div id="notes-list"></div>
+    </div>
+
+    <script>
+        // Hàm load dữ liệu từ API
+        async function fetchNotes() {
+            const response = await fetch('/notes');
+            const notes = await response.json();
+            const list = document.getElementById('notes-list');
+            list.innerHTML = '';
+            notes.forEach(note => {
+                list.innerHTML += `
+                    <div class="note">
+                        <h4>${note.title}</h4>
+                        <p>${note.content}</p>
+                    </div>`;
+            });
+        }
+
+        // Hàm lưu dữ liệu
+        async function saveNote() {
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            if(!title || !content) return alert("Vui lòng nhập đủ thông tin!");
+
+            await fetch('/notes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, content })
+            });
+            
+            document.getElementById('title').value = '';
+            document.getElementById('content').value = '';
+            fetchNotes(); // Tải lại danh sách
+        }
+
+        fetchNotes(); // Chạy ngay khi mở web
+    </script>
+</body>
+</html>
