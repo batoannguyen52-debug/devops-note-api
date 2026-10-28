@@ -11,7 +11,7 @@ jobs:
     # THÊM ĐOẠN NÀY ĐỂ CẤP DATABASE CHO GITHUB ACTIONS CHẠY TEST
     services:
       mongodb:
-        image: mongo:7.0
+        image: mongo:6.0
         ports:
           - 27017:27017
 
