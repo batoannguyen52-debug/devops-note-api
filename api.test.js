@@ -1,15 +1,24 @@
 const request = require('supertest');
-const app = require('./server');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
+const app = require('./server');
 
-// Nới lỏng thời gian chờ lên hẳn 30 giây cho môi trường ảo
-jest.setTimeout(30000);
+let mongoServer;
 
+// Khởi tạo một MongoDB chạy ngầm trong RAM trước khi test
 beforeAll(async () => {
-  // Ép test phải đợi DB kết nối thành công 100% trước khi chạy API
+  mongoServer = await MongoMemoryServer.create();
+  const uri = mongoServer.getUri();
+  
   if (mongoose.connection.readyState === 0) {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/notedb');
+    await mongoose.connect(uri);
   }
+});
+
+// Ngắt kết nối và tắt Database RAM sau khi test xong
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
 });
 
 describe('GET /notes', () => {
@@ -18,9 +27,4 @@ describe('GET /notes', () => {
     expect(res.statusCode).toEqual(200);
     expect(Array.isArray(res.body)).toBeTruthy();
   });
-});
-
-afterAll(async () => {
-  // Dọn dẹp sạch sẽ tiến trình sau khi Test xong
-  await mongoose.disconnect();
 });
