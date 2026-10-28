@@ -7,14 +7,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
-    # THÊM ĐOẠN NÀY ĐỂ CẤP DATABASE CHO GITHUB ACTIONS CHẠY TEST
     services:
       mongodb:
-        image: mongo:6.0
+        image: mongo:5.0
         ports:
           - 27017:27017
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -24,11 +21,16 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Force Install Latest Mongoose
+        run: npm install mongoose@8.4.0 --no-save # Ép GHA dùng bản mới nhất
+
       - name: Install dependencies
         run: npm install
 
       - name: Run Automated Tests
         run: npm test
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/notedb_test
 
   deploy:
     needs: test
