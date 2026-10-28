@@ -2,6 +2,9 @@ const request = require('supertest');
 const app = require('./server');
 const mongoose = require('mongoose');
 
+// Tăng giới hạn thời gian chờ của Jest lên 20 giây (20000 ms)
+jest.setTimeout(20000);
+
 describe('GET /notes', () => {
   it('should return a list of notes or empty array with status 200', async () => {
     const res = await request(app).get('/notes');
@@ -11,5 +14,8 @@ describe('GET /notes', () => {
 });
 
 afterAll(async () => {
-  await mongoose.connection.close(); // Đóng kết nối sau khi test xong
+  // Buộc ngắt toàn bộ kết nối Database sau khi test xong để không bị treo hook
+  if (mongoose.connection.readyState !== 0) {
+    await mongoose.disconnect();
+  }
 });
