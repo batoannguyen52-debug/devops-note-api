@@ -9,7 +9,7 @@
 
 ---
 
-## Hướng dẫn triển khai thủ công (Week 1)
+## Hướng dẫn triển khai thủ công
 1. Clone source code: `git clone <repository_url>`
 2. Cài đặt các dependencies: `sudo apt install nginx mongodb` và Node.js.
 3. Vào thư mục dự án chạy: `npm install`
@@ -18,7 +18,7 @@
 
 ---
 
-## Hướng dẫn triển khai bằng Docker & CI/CD (Week 2)
+## Hướng dẫn triển khai bằng Docker & CI/CD
 
 Từ Tuần 2, hệ thống đã được container hóa và tự động hóa quá trình kiểm thử, triển khai.
 
