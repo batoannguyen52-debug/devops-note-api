@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline - Smart Note
 
 on:
   push:
@@ -7,17 +7,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: CI/CD Pipeline - Smart Note
-
-on:
-  push:
-    branches: [ "main" ]
-
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
     
-    # Kích hoạt MongoDB ảo ngay trên GitHub Actions
+    # Cấp Database ảo cho lúc chạy Test
     services:
       mongo:
         image: mongo:latest
@@ -36,44 +27,22 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Run tests
+    - name: Run automated tests
       run: npm test
-    services:
-      mongodb:
-        image: mongo:5.0
-        ports:
-          - 27017:27017
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      - name: Force Install Latest Mongoose
-        run: npm install mongoose@8.4.0 --no-save # Ép GHA dùng bản mới nhất
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run Automated Tests
-        run: npm test
-        env:
-          MONGO_URI: mongodb://127.0.0.1:27017/notedb_test
+      env:
+        MONGO_URI: mongodb://127.0.0.1:27017/notedb_test
 
   deploy:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd ~/devops-note-api
-            git pull origin main
-            sudo docker compose up -d --build
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          cd ~/devops-note-api
+          git pull origin main
+          sudo docker compose up -d --build
