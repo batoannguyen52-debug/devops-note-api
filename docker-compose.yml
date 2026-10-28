@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    container_name: note-api-app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://db:27017/notedb
+    depends_on:
+      - db
+    networks:
+      - note-network
+
+  db:
+    image: mongo:7.0
+    container_name: note-api-db
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - note-network
+
+networks:
+  note-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
