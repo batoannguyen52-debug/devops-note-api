@@ -1,64 +1,1072 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <title>DevOps Smart Note App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="DevOps Smart Note - Ứng dụng ghi chú kiến thức DevOps, Docker, CI/CD hiện đại và tiện lợi">
+    <title>DevOps Smart Note | Cloud & CI/CD Hub</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
-        input, textarea { width: 100%; margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-        button:hover { background: #218838; }
-        .note { background: #e9ecef; padding: 15px; margin-top: 15px; border-radius: 4px; border-left: 5px solid #007bff; }
-        .note h4 { margin: 0 0 5px 0; color: #007bff; }
-        .note p { margin: 0; color: #555; }
+        :root {
+            /* Dark Theme Colors (Default) */
+            --bg-body: #090d16;
+            --bg-card: rgba(18, 24, 40, 0.75);
+            --bg-card-hover: rgba(26, 34, 56, 0.85);
+            --bg-input: rgba(13, 18, 30, 0.8);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(99, 102, 241, 0.4);
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+
+            --primary-start: #6366f1;
+            --primary-mid: #3b82f6;
+            --primary-end: #06b6d4;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #06b6d4 100%);
+            --primary-glow: rgba(99, 102, 241, 0.35);
+
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.15);
+            --danger: #f43f5e;
+            --danger-bg: rgba(244, 63, 94, 0.15);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245, 158, 11, 0.15);
+
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-full: 9999px;
+
+            --shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+            --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-color);
+            --shadow-glow: 0 0 25px var(--primary-glow);
+        }
+
+        [data-theme="light"] {
+            --bg-body: #f1f5f9;
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --bg-card-hover: rgba(255, 255, 255, 0.98);
+            --bg-input: #ffffff;
+            --border-color: rgba(148, 163, 184, 0.25);
+            --border-hover: rgba(99, 102, 241, 0.6);
+
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+
+            --primary-glow: rgba(99, 102, 241, 0.2);
+            --shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+            --shadow-card: 0 10px 30px -5px rgba(148, 163, 184, 0.2), 0 0 0 1px var(--border-color);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Ambient Glow Background Effect */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(120px);
+            opacity: 0.25;
+            transition: opacity 0.3s ease;
+        }
+        body::before {
+            top: -150px;
+            left: -150px;
+            background: radial-gradient(circle, #6366f1, #3b82f6);
+        }
+        body::after {
+            bottom: -150px;
+            right: -150px;
+            background: radial-gradient(circle, #06b6d4, #8b5cf6);
+        }
+
+        /* App Container */
+        .app-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px 20px 48px;
+            width: 100%;
+        }
+
+        /* Navbar Header */
+        header.app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            padding: 16px 28px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            margin-bottom: 32px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .brand-area {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px var(--primary-glow);
+            color: #ffffff;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .brand-text h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        .brand-text p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--success-bg);
+            color: var(--success);
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .pulse-dot::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+            background-color: var(--success);
+            animation: pulse-ring 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.9); opacity: 0.9; }
+            70% { transform: scale(2.8); opacity: 0; }
+            100% { transform: scale(3.2); opacity: 0; }
+        }
+
+        .icon-btn {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+
+        .icon-btn:hover {
+            border-color: var(--primary-start);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Main Content Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 28px;
+            align-items: start;
+        }
+
+        @media (max-width: 960px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glassmorphism Card Base */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            transition: all 0.3s ease;
+        }
+
+        /* Note Form Card (Sticky on desktop) */
+        .form-card {
+            position: sticky;
+            top: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+        }
+
+        .card-title-icon {
+            color: var(--primary-start);
+            font-size: 18px;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .text-input, .textarea-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .text-input:focus, .textarea-input:focus {
+            border-color: var(--primary-start);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            background: var(--bg-card);
+        }
+
+        .text-input::placeholder, .textarea-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .textarea-input {
+            min-height: 120px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        /* Category Selector Chips */
+        .category-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .chip-btn {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+        }
+
+        .chip-btn:hover {
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .chip-btn.active {
+            background: var(--primary-gradient);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 3px 10px var(--primary-glow);
+        }
+
+        /* Save Button */
+        .submit-btn {
+            width: 100%;
+            background: var(--primary-gradient);
+            color: #ffffff;
+            border: none;
+            padding: 14px 20px;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 18px var(--primary-glow);
+            transition: all 0.25s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.5);
+            filter: brightness(1.06);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .shortcut-hint {
+            font-size: 11px;
+            opacity: 0.8;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 4px;
+        }
+
+        /* Feed Controls & Toolbar */
+        .feed-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 15px;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-full);
+            padding: 10px 16px 10px 40px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-start);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .filter-pill {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .filter-pill:hover {
+            color: var(--text-primary);
+            border-color: var(--primary-start);
+        }
+
+        .filter-pill.active {
+            background: var(--primary-gradient);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 2px 8px var(--primary-glow);
+        }
+
+        .count-badge {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: var(--bg-input);
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Notes Grid */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 640px) {
+            .notes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Note Card */
+        .note-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: card-appear 0.35s ease-out;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        @keyframes card-appear {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .note-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.35), 0 0 20px var(--primary-glow);
+        }
+
+        .note-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .category-tag {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+        }
+
+        .tag-devops { background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+        .tag-docker { background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.3); }
+        .tag-cicd { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+        .tag-server { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .tag-chung { background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); }
+
+        .note-date {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .note-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.4;
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+
+        .note-body {
+            font-size: 13.5px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-bottom: 18px;
+            flex-grow: 1;
+        }
+
+        .note-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--primary-start);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .action-btn.delete-btn:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+            background: var(--danger-bg);
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px dashed var(--border-color);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: inline-block;
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .empty-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            font-size: 14px;
+            font-weight: 600;
+            min-width: 280px;
+            max-width: 400px;
+            pointer-events: auto;
+            animation: toast-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.3s ease;
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+        .toast.info { border-left: 4px solid var(--primary-start); }
+
+        @keyframes toast-slide-in {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Footer */
+        footer.app-footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 30px 20px 10px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .footer-highlight {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>📝 Smart Note - DevOps Week 1</h2>
-        <input type="text" id="title" placeholder="Nhập tiêu đề ghi chú..." required>
-        <textarea id="content" rows="4" placeholder="Nhập nội dung..." required></textarea>
-        <button onclick="saveNote()">Lưu Ghi Chú</button>
+    <div class="app-wrapper">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand-area">
+                <div class="brand-logo">🚀</div>
+                <div class="brand-text">
+                    <h1>DevOps Smart Note</h1>
+                    <p>Docker • MongoDB • CI/CD Automated Platform</p>
+                </div>
+            </div>
 
-        <div id="notes-list"></div>
+            <div class="header-actions">
+                <div class="status-badge" title="Backend API & MongoDB đã sẵn sàng">
+                    <span class="pulse-dot"></span>
+                    <span>Hệ thống Online</span>
+                </div>
+                <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()" title="Đổi giao diện Sáng / Tối">
+                    <span id="theme-icon">☀️</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <main class="main-layout">
+            <!-- Sidebar: Create Note Form -->
+            <aside class="glass-card form-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-title-icon">✏️</span>
+                        <span>Tạo Ghi Chú Mới</span>
+                    </div>
+                </div>
+
+                <form id="note-form" onsubmit="event.preventDefault(); saveNote();">
+                    <div class="input-group">
+                        <label class="input-label">Chuyên mục</label>
+                        <div class="category-chips" id="category-selector">
+                            <span class="chip-btn active" onclick="selectCategory(this, 'DevOps')">☁️ DevOps</span>
+                            <span class="chip-btn" onclick="selectCategory(this, 'Docker')">🐳 Docker</span>
+                            <span class="chip-btn" onclick="selectCategory(this, 'CI/CD')">⚡ CI/CD</span>
+                            <span class="chip-btn" onclick="selectCategory(this, 'Server')">🖥️ Server</span>
+                            <span class="chip-btn" onclick="selectCategory(this, 'Chung')">📌 Chung</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label" for="title">Tiêu đề ghi chú</label>
+                        <input type="text" id="title" class="text-input" placeholder="Ví dụ: Thiết lập Nginx Reverse Proxy..." required autocomplete="off">
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label" for="content">Nội dung chi tiết</label>
+                        <textarea id="content" class="textarea-input" rows="5" placeholder="Ghi chép các câu lệnh, lưu ý hoặc kiến thức cần nhớ..." required></textarea>
+                    </div>
+
+                    <button type="submit" id="save-btn" class="submit-btn">
+                        <span>Lưu Ghi Chú</span>
+                        <span class="shortcut-hint">Ctrl + Enter</span>
+                    </button>
+                </form>
+            </aside>
+
+            <!-- Right: Notes Feed -->
+            <section class="feed-section">
+                <!-- Feed Controls -->
+                <div class="feed-header">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search-input" class="search-input" placeholder="Tìm kiếm ghi chú theo tiêu đề hoặc nội dung..." oninput="handleSearch()">
+                    </div>
+
+                    <div class="filter-tags">
+                        <button class="filter-pill active" onclick="filterCategory(this, 'ALL')">Tất cả</button>
+                        <button class="filter-pill" onclick="filterCategory(this, 'DevOps')">DevOps</button>
+                        <button class="filter-pill" onclick="filterCategory(this, 'Docker')">Docker</button>
+                        <button class="filter-pill" onclick="filterCategory(this, 'CI/CD')">CI/CD</button>
+                        <button class="filter-pill" onclick="filterCategory(this, 'Server')">Server</button>
+                    </div>
+
+                    <div class="count-badge" id="notes-counter">0 ghi chú</div>
+                </div>
+
+                <!-- Notes List Grid -->
+                <div class="notes-grid" id="notes-list">
+                    <!-- Note items dynamically rendered here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>DevOps Final Project • Developed by <span class="footer-highlight">Làng Xì Mi</span> • Automated with GitHub Actions</p>
+        </footer>
     </div>
 
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+
     <script>
-        // Hàm load dữ liệu từ API
-        async function fetchNotes() {
-            const response = await fetch('/notes');
-            const notes = await response.json();
-            const list = document.getElementById('notes-list');
-            list.innerHTML = '';
-            notes.forEach(note => {
-                list.innerHTML += `
-                    <div class="note">
-                        <h4>${note.title}</h4>
-                        <p>${note.content}</p>
-                    </div>`;
-            });
+        let allNotes = [];
+        let selectedCategory = 'DevOps';
+        let currentFilter = 'ALL';
+        let searchQuery = '';
+
+        // Category Colors Mapping
+        const categoryClasses = {
+            'DevOps': 'tag-devops',
+            'Docker': 'tag-docker',
+            'CI/CD': 'tag-cicd',
+            'Server': 'tag-server',
+            'Chung': 'tag-chung'
+        };
+
+        // Theme Toggle
+        function initTheme() {
+            const savedTheme = localStorage.getItem('smart_note_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
         }
 
-        // Hàm lưu dữ liệu
-        async function saveNote() {
-            const title = document.getElementById('title').value;
-            const content = document.getElementById('content').value;
-            if(!title || !content) return alert("Vui lòng nhập đủ thông tin!");
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('smart_note_theme', next);
+            updateThemeIcon(next);
+        }
 
-            await fetch('/notes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, content })
-            });
+        function updateThemeIcon(theme) {
+            document.getElementById('theme-icon').textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Category Selection in Form
+        function selectCategory(el, cat) {
+            document.querySelectorAll('#category-selector .chip-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            selectedCategory = cat;
+        }
+
+        // Category Filter for Feed
+        function filterCategory(el, cat) {
+            document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            currentFilter = cat;
+            renderNotes();
+        }
+
+        // Search Input Handler
+        function handleSearch() {
+            searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+            renderNotes();
+        }
+
+        // Toast Notification System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
             
-            document.getElementById('title').value = '';
-            document.getElementById('content').value = '';
-            fetchNotes(); // Tải lại danh sách
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
-        fetchNotes(); // Chạy ngay khi mở web
+        // Format Date nicely
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Vừa xong';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('vi-VN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // Fetch Notes from API
+        async function fetchNotes() {
+            try {
+                const response = await fetch('/notes');
+                if (!response.ok) throw new Error('Không thể tải dữ liệu');
+                allNotes = await response.json();
+                renderNotes();
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi khi tải danh sách ghi chú!', 'error');
+            }
+        }
+
+        // Render Filtered Notes
+        function renderNotes() {
+            const list = document.getElementById('notes-list');
+            const counter = document.getElementById('notes-counter');
+
+            let filtered = allNotes.filter(note => {
+                const matchCat = (currentFilter === 'ALL') || (note.category === currentFilter);
+                const title = (note.title || '').toLowerCase();
+                const content = (note.content || '').toLowerCase();
+                const matchSearch = !searchQuery || title.includes(searchQuery) || content.includes(searchQuery);
+                return matchCat && matchSearch;
+            });
+
+            counter.textContent = `${filtered.length} ghi chú`;
+
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📂</div>
+                        <h3 class="empty-title">Chưa có ghi chú nào</h3>
+                        <p class="empty-desc">Không tìm thấy ghi chú phù hợp. Hãy tạo một ghi chú mới hoặc thay đổi bộ lọc tìm kiếm!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = filtered.map(note => {
+                const cat = note.category || 'Chung';
+                const tagClass = categoryClasses[cat] || 'tag-chung';
+                const safeTitle = escapeHtml(note.title);
+                const safeContent = escapeHtml(note.content);
+
+                return `
+                    <article class="note-card" id="note-${note._id}">
+                        <div>
+                            <div class="note-top">
+                                <span class="category-tag ${tagClass}">${cat}</span>
+                                <span class="note-date">🕒 ${formatDate(note.createdAt)}</span>
+                            </div>
+                            <h3 class="note-title">${safeTitle}</h3>
+                            <div class="note-body">${safeContent}</div>
+                        </div>
+
+                        <div class="note-actions">
+                            <button class="action-btn" onclick="copyNoteContent('${note._id}')" title="Sao chép nội dung">
+                                📋 <span>Sao chép</span>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteNote('${note._id}')" title="Xóa ghi chú">
+                                🗑️ <span>Xóa</span>
+                            </button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Save Note
+        async function saveNote() {
+            const titleInput = document.getElementById('title');
+            const contentInput = document.getElementById('content');
+            const submitBtn = document.getElementById('save-btn');
+
+            const title = titleInput.value.trim();
+            const content = contentInput.value.trim();
+
+            if (!title || !content) {
+                showToast('Vui lòng nhập đầy đủ tiêu đề và nội dung!', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Đang lưu...</span>';
+
+            try {
+                const response = await fetch('/notes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        content,
+                        category: selectedCategory
+                    })
+                });
+
+                if (!response.ok) throw new Error('Không thể lưu ghi chú');
+                
+                titleInput.value = '';
+                contentInput.value = '';
+                showToast('Đã lưu ghi chú thành công!');
+                await fetchNotes();
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi khi lưu ghi chú vào Database!', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Lưu Ghi Chú</span> <span class="shortcut-hint">Ctrl + Enter</span>';
+            }
+        }
+
+        // Delete Note
+        async function deleteNote(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa ghi chú này không?')) return;
+
+            try {
+                const response = await fetch(`/notes/${id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Xóa thất bại');
+                
+                showToast('Đã xóa ghi chú thành công!');
+                allNotes = allNotes.filter(n => n._id !== id);
+                renderNotes();
+            } catch (err) {
+                console.error(err);
+                showToast('Không thể xóa ghi chú!', 'error');
+            }
+        }
+
+        // Copy Note Content
+        function copyNoteContent(id) {
+            const note = allNotes.find(n => n._id === id);
+            if (!note) return;
+
+            const text = `${note.title}\n\n${note.content}`;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Đã sao chép nội dung vào Clipboard!');
+            }).catch(() => {
+                showToast('Không thể sao chép văn bản!', 'error');
+            });
+        }
+
+        // Shortcut: Ctrl + Enter to submit form
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                saveNote();
+            }
+        });
+
+        // Initialize on load
+        initTheme();
+        fetchNotes();
     </script>
 </body>
 </html>

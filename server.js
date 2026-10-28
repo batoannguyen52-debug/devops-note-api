@@ -23,6 +23,7 @@ if (process.env.NODE_ENV !== 'test') {
 const Note = mongoose.model('Note', new mongoose.Schema({
   title: String,
   content: String,
+  category: { type: String, default: 'Chung' },
   createdAt: { type: Date, default: Date.now }
 }));
 
@@ -39,6 +40,18 @@ app.post('/notes', async (req, res) => {
   try {
     const newNote = await Note.create(req.body);
     res.status(201).json(newNote);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/notes/:id', async (req, res) => {
+  try {
+    const note = await Note.findByIdAndDelete(req.params.id);
+    if (!note) {
+      return res.status(404).json({ error: 'Không tìm thấy ghi chú' });
+    }
+    res.json({ message: 'Xóa ghi chú thành công', id: req.params.id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

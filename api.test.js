@@ -38,11 +38,31 @@ describe('GET /notes', () => {
 
 describe('POST /notes', () => {
   it('should create a new note with status 201', async () => {
-    const noteData = { title: 'Test Note CI/CD', content: 'Testing automated workflow' };
+    const noteData = { title: 'Test Note CI/CD', content: 'Testing automated workflow', category: 'DevOps' };
     const res = await request(app).post('/notes').send(noteData);
     expect(res.statusCode).toEqual(201);
     expect(res.body.title).toEqual(noteData.title);
     expect(res.body.content).toEqual(noteData.content);
+    expect(res.body.category).toEqual('DevOps');
     expect(res.body).toHaveProperty('_id');
+  });
+});
+
+describe('DELETE /notes/:id', () => {
+  it('should delete an existing note with status 200', async () => {
+    const noteRes = await request(app)
+      .post('/notes')
+      .send({ title: 'Temporary Note', content: 'To be deleted' });
+    const noteId = noteRes.body._id;
+
+    const res = await request(app).delete(`/notes/${noteId}`);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.message).toContain('thành công');
+  });
+
+  it('should return 404 when deleting a non-existent note', async () => {
+    const fakeId = new mongoose.Types.ObjectId();
+    const res = await request(app).delete(`/notes/${fakeId}`);
+    expect(res.statusCode).toEqual(404);
   });
 });
