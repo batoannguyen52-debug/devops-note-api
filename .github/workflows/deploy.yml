@@ -7,6 +7,37 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    name: CI/CD Pipeline - Smart Note
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    # Kích hoạt MongoDB ảo ngay trên GitHub Actions
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npm test
     services:
       mongodb:
         image: mongo:5.0
