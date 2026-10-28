@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'test';
 const request = require('supertest');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
@@ -5,20 +6,26 @@ const app = require('./server');
 
 let mongoServer;
 
-// Khởi tạo một MongoDB chạy ngầm trong RAM trước khi test
+// Tăng thời gian chờ cho Jest khi khởi tạo MongoDB RAM
+jest.setTimeout(60000);
+
+// Khởi tạo kết nối DB trước khi test: ưu tiên MONGO_URI, fallback về RAM DB
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const uri = mongoServer.getUri();
-  
-  if (mongoose.connection.readyState === 0) {
+  if (process.env.MONGO_URI) {
+    await mongoose.connect(process.env.MONGO_URI);
+  } else {
+    mongoServer = await MongoMemoryServer.create();
+    const uri = mongoServer.getUri();
     await mongoose.connect(uri);
   }
 });
 
-// Ngắt kết nối và tắt Database RAM sau khi test xong
+// Ngắt kết nối và giải phóng tài nguyên sau khi test xong
 afterAll(async () => {
   await mongoose.disconnect();
-  await mongoServer.stop();
+  if (mongoServer) {
+    await mongoServer.stop();
+  }
 });
 
 describe('GET /notes', () => {
@@ -26,5 +33,16 @@ describe('GET /notes', () => {
     const res = await request(app).get('/notes');
     expect(res.statusCode).toEqual(200);
     expect(Array.isArray(res.body)).toBeTruthy();
+  });
+});
+
+describe('POST /notes', () => {
+  it('should create a new note with status 201', async () => {
+    const noteData = { title: 'Test Note CI/CD', content: 'Testing automated workflow' };
+    const res = await request(app).post('/notes').send(noteData);
+    expect(res.statusCode).toEqual(201);
+    expect(res.body.title).toEqual(noteData.title);
+    expect(res.body.content).toEqual(noteData.content);
+    expect(res.body).toHaveProperty('_id');
   });
 });
