@@ -7,6 +7,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    # THÊM ĐOẠN NÀY ĐỂ CẤP DATABASE CHO GITHUB ACTIONS CHẠY TEST
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
