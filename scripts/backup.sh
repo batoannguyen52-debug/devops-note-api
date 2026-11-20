@@ -12,4 +12,7 @@ trap 'rm -f "$archive" "$archive.sha256"' ERR
 docker compose exec -T db mongodump --db "$DB_NAME" --archive --gzip > "$archive"
 test -s "$archive"
 (cd "$BACKUP_DIR" && sha256sum "$(basename "$archive")" > "$(basename "$archive").sha256")
+if [[ -n "${SUDO_USER:-}" ]]; then
+  chown -R "$SUDO_USER:$SUDO_USER" "$BACKUP_DIR"
+fi
 echo "Backup verified: $archive"

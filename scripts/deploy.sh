@@ -18,6 +18,7 @@ export APP_IMAGE="devops-note-api:$version" APP_VERSION="$version"
 # Build before touching the running stack. Build failure leaves the old app serving.
 docker compose build app
 if [[ -n $(docker compose ps -q db) ]]; then bash scripts/backup.sh; fi
+# Thay đoạn persist_selection() trong scripts/deploy.sh bằng đoạn này:
 persist_selection() {
 python3 - "$APP_IMAGE" "$APP_VERSION" <<'PY'
 import os,pathlib,sys,tempfile
@@ -27,6 +28,7 @@ lines=[x for x in lines if not x.startswith(('APP_IMAGE=', 'APP_VERSION='))]
 lines += ['APP_IMAGE='+sys.argv[1], 'APP_VERSION='+sys.argv[2]]
 fd,tmp=tempfile.mkstemp(prefix='.env-',dir='.')
 with os.fdopen(fd,'w') as f: f.write('\n'.join(lines)+'\n')
+os.chmod(tmp, 0o644)
 os.replace(tmp,p)
 PY
 }
@@ -53,4 +55,5 @@ bash scripts/smoke-test.sh "http://127.0.0.1:${APP_PORT:-3000}" "$version"
 # Persist the selected image for later compose/restore commands without exposing secrets.
 persist_selection
 trap - ERR
+docker image prune -f >/dev/null 2>&1 || true
 echo "Deployed and verified: $version"
