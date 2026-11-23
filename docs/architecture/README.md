@@ -1,26 +1,49 @@
-# Kiến trúc cuối — Docker Compose
+# Tiến hóa Kiến trúc Hệ thống Smart Note (Architecture Evolution)
+
+Tài liệu này tổng hợp và phân tích kiến trúc hệ thống **Smart Note** qua các mốc phát triển đồ án DevOps 2026:
+
+---
+
+## 1. Các mốc Kiến trúc Hệ thống
+
+* **[Kiến trúc Tuần 1: Khởi tạo Hạ tầng Ban đầu (Initial Deployment)](from-week-1/README.md)**
+  * **Mô hình:** Bare-metal trên máy chủ ảo hóa AWS EC2 (Ubuntu 24.04).
+  * **Quản lý tiến trình:** Quản lý bằng PM2, Web server Nginx reverse proxy cổng 80, database MongoDB cài trực tiếp trên máy chủ.
+  * **Xem chi tiết:** [Phân tích kiến trúc Tuần 1](from-week-1/README.md) & [Sơ đồ kiến trúc Tuần 1](from-week-1/diagram.png).
+
+* **[Kiến trúc Tuần 4: Hoàn thiện Vận hành — Docker Compose & CI/CD Pipeline (Final Production)](from-week-4/README.md)**
+  * **Mô hình:** Container hóa 100% bằng **Docker Compose**, bảo mật container không đặc quyền (`USER node`, `read_only: true`, `cap_drop: [ALL]`), lưu trữ dữ liệu bền vững qua **Named Volume** (`mongo_data`).
+  * **Tự động hóa:** Đường ống **GitHub Actions CI/CD** (10 automated API tests, kiểm thử vận hành, tự động rollback, SSH deployment).
+  * **Vận hành:** Backup có mã băm `sha256sum`, JSON Log rotation, healthcheck & readiness check độc lập.
+  * **Xem chi tiết:** [Phân tích kiến trúc Tuần 4](from-week-4/README.md) & [Sơ đồ kiến trúc Tuần 4](from-week-4/image.png).
+
+---
+
+## 2. Sơ đồ Kiến trúc Tổng thể Tuần 4 (Final Architecture)
+
+![Kiến trúc hệ thống Tuần 4](from-week-4/image.png)
 
 ```mermaid
 flowchart TD
-    User[Trình duyệt] --> SG[AWS Security Group / UFW]
-    SG --> Nginx[Nginx trên EC2 :80, TLS khi được cấu hình]
-    Nginx --> App[Express trong Docker, host 127.0.0.1:3000]
-    App --> DB[MongoDB 6.0, mạng nội bộ Compose]
-    DB --> Volume[(mongo_data)]
-    Git[GitHub commit / PR] --> Test[API tests + Docker operations tests]
-    Test -->|main, tests pass| SSH[SSH checkout đúng commit]
-    SSH --> Deploy[Build image SHA → backup → up/wait → smoke]
-    Deploy --> App
-    Deploy -->|failure| Rollback[Khôi phục application image trước]
-    DB --> Backup[Archive + SHA256 ngoài checkout]
-    App --> Logs[JSON request logs / Docker log rotation]
-    EC2[EC2 metrics] --> CW[CloudWatch: cần xác minh cấu hình AWS]
+    User[Trình duyệt người dùng] -->|HTTP :80 / HTTPS :443| SG[AWS Security Group & UFW]
+    SG --> Nginx[Nginx Reverse Proxy trên Host]
+    Nginx -->|proxy_pass 127.0.0.1:3000| App[Container: note-api-app<br/>Node 22-alpine / USER node / read_only]
+    App -->|note-network nội bộ :27017| DB[Container: note-api-db<br/>MongoDB 6.0]
+    DB --> Volume[(Named Volume: mongo_data)]
+    
+    Git[Developer Git Push] --> CI[GitHub Actions: test + operations + rollback]
+    CI -->|main & tests pass| Deploy[SSH Deploy: scripts/deploy.sh]
+    Deploy -->|Build image SHA & Up| App
+    Deploy -->|Smoke test fail| Rollback[Automated Rollback image cũ]
+    
+    DB --> Backup[scripts/backup.sh: .archive.gz + .sha256]
+    App --> Logs[JSON Logs / Docker Log Rotation]
+    Host[EC2 Metrics] --> CloudWatch[AWS CloudWatch Alarm CPU > 70%]
 ```
 
-Nginx chạy trên host; Docker quản lý app và DB, thay vai trò PM2 ở tuần 1. `diagram.png` được giữ làm minh chứng lịch sử tuần 1; sơ đồ Mermaid trên là kiến trúc hiện tại.
+---
 
-App chạy user `node`, filesystem chỉ đọc, bỏ Linux capabilities. Chỉ host loopback được publish cổng app; MongoDB không có mapping cổng. Volume lưu dữ liệu qua lần tạo lại container. Tên project mặc định lấy từ thư mục `devops-note-api`, vì vậy không đổi tên project trên EC2 hiện hữu.
-
-Readiness `/health` ping DB và chứa SHA phiên bản. `/live` chỉ phản ánh tiến trình HTTP. Docker dùng readiness để kiểm tra triển khai; trạng thái unhealthy tự nó không làm Docker restart, nên cần monitoring/cảnh báo. Restart policy chỉ phục hồi khi tiến trình dừng, không phải giải pháp cho mọi lỗi tài nguyên.
-
-CI có database riêng cho API test và project Compose riêng cho thử nghiệm có xóa dữ liệu. Pipeline production chỉ kiểm tra đọc HTTP; không cố tình gây lỗi hoặc xóa dữ liệu người dùng.
+## 3. Tổng kết Lợi ích Đạt được
+1. **Cô lập và nhất quán:** Môi trường phát triển và môi trường vận hành được đồng nhất nhờ Dockerfile và Docker Compose.
+2. **Tin cậy và phục hồi nhanh:** Dữ liệu an toàn qua named volume; pipeline có cơ chế tự động rollback ngăn chặn phiên bản lỗi.
+3. **Bảo mật nhiều lớp:** Phân vùng mạng nội bộ, loại bỏ quyền root trên container, lọc cổng nghiêm ngặt từ UFW và Security Group.
